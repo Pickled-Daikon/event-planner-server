@@ -88,17 +88,6 @@ export async function insertOne(user: IUser): Promise<IUser>  {
     return queryResult.ops[0];
 }
 
-export function isIUser(obj: any): obj is IUser {
-   return hasShape(obj, {
-       [ID]: {isRequired: false, type: 'string'},
-       [FIRST_NAME]: {isRequired: true, type: 'string'},
-       [LAST_NAME]: {isRequired: true, type: 'string'},
-       [EMAIL]: {isRequired: true, type: 'string'},
-       [PASSWORD]: {isRequired: true, type: 'string'},
-       [IS_ADMIN]: {isRequired: true, type: 'boolean'},
-   })
-}
-
 export async function find(filter: IUserQueryFilter): Promise<IUser[]> {
     const db = getDb();
     let foundUsers: IUser[];
@@ -109,3 +98,16 @@ export async function find(filter: IUserQueryFilter): Promise<IUser[]> {
         throw new QueryError();
     }
 }
+
+
+export function isIUser(obj: any): obj is IUser {
+    return hasShape(obj, {
+        [ID]: {isRequired: false, type: 'string'},
+        [FIRST_NAME]: {isRequired: true, type: 'string'},
+        [LAST_NAME]: {isRequired: true, type: 'string'},
+        [EMAIL]: {isRequired: true, type: 'string'},
+        [PASSWORD]: {isRequired: true, type: 'string'},
+        [IS_ADMIN]: {isRequired: true, type: 'boolean'},
+    })
+}
+
