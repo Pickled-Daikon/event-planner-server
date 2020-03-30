@@ -80,6 +80,5 @@ export function isIEvent(obj: any): obj is IEvent {
     if (new Date(obj[END_DATE_TIME]).toString() === INVALID_DATE) {
         return false;
     }
-
     return true;
 }
