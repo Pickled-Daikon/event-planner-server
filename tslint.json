@@ -1,0 +1,10 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "rules": {
+    "trailing-comma": [ false ],
+    "max-classes-per-file": false
+  }
+}
