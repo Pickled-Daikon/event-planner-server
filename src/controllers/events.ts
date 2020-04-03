@@ -11,5 +11,15 @@ export async function createEvent(req: Request, res: Response): Promise<Response
     const event = req.body.event;
     const isEvent = Event.isIEvent(event);
 
-    return res;
+    if (!isEvent) {
+        return res.status(400).json({error: ERROR_MSGS.BAD_EVENT_GIVEN});
+    }
+
+    try {
+        const newEvent = await Event.insertOne(event);
+        return res.status(200).json({event: newEvent});
+    } catch (e) {
+        return res.status(400).json({error: ERROR_MSGS.SERVER_ERROR});
+    }
 }
+
