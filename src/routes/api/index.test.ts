@@ -1,7 +1,10 @@
 import usersRouter from './users';
+import eventsRouter from './events';
+
 import Express from 'express';
 
 jest.mock('./users');
+jest.mock('./events');
 jest.mock('express');
 
 const use = jest.fn(() => null);
@@ -22,6 +25,8 @@ test('api router is initialized', () => {
 });
 
 test('api routers are applied to central router', () => {
-    expect(use).toBeCalledTimes(1);
+    expect(use).toBeCalledTimes(2);
     expect(use).toBeCalledWith(`/${API}`, usersRouter);
+    expect(use).toBeCalledWith(`/${API}`, eventsRouter);
 });
+
