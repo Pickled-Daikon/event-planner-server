@@ -62,16 +62,38 @@ export async function insertOne(event: IEvent): Promise<IEvent> {
 }
 
 export function isIEvent(obj: any): obj is IEvent {
+    /* has shape not working for this for some reason
     const hasCorrectShape = hasShape(obj, {
-        [ID]: {isRequired: false, type: 'string'},
-        [USER_ID]: {isRequired: true, type: 'string'},
-        [DESCRIPTION]: {isRequired: true, type: 'string'},
-        [LOCATION]: {isRequired: true, type: 'string'},
-        [START_DATE_TIME]: {isRequired: true, type: 'string'},
-        [END_DATE_TIME]: {isRequired: true, type: 'string'}
+        _id: {isRequired: false, type: 'string'},
+        userId: {isRequired: true, type: 'string'},
+        description: {isRequired: true, type: 'string'},
+        location: {isRequired: true, type: 'string'},
+        startDateTime: {isRequired: true, type: 'string'},
+        endDateTime: {isRequired: true, type: 'string'}
     });
+    */
 
-    if (!hasCorrectShape) return false;
+    // quick fix since hasShape is not working;
+    if (!obj.userId || typeof obj.userId !== 'string') {
+        return false;
+    }
+
+    if (!obj.description || typeof obj.description !== 'string') {
+        return false;
+    }
+
+    if (!obj.location || typeof obj.location !== 'string') {
+        return false;
+    }
+
+    if (!obj.startDateTime || typeof obj.startDateTime !== 'string') {
+        return false;
+    }
+
+    if (!obj.endDateTime || typeof obj.endDateTime !== 'string') {
+        return false;
+    }
+
 
     if (new Date(obj[START_DATE_TIME]).toString() === INVALID_DATE) {
         return false;
