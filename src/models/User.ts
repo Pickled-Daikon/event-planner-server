@@ -1,6 +1,6 @@
 import {getDb} from "../db";
 import {QueryError} from "./errors";
-import {InsertOneWriteOpResult} from "mongodb";
+import { InsertOneWriteOpResult, ObjectID } from "mongodb";
 import hasShape from "../tools/hasShape";
 
 const USERS = 'users'; // collection name
@@ -35,7 +35,7 @@ export interface IUser {
 }
 
 export interface IUserQueryFilter {
-    _id?: string,
+    _id?: string | ObjectID,
     firstName?: string,
     lastName?: string,
     email?: string,
@@ -47,6 +47,9 @@ export async function findOne(filter: IUserQueryFilter): Promise<IUser> {
     let foundUser: IUser|null = null;
     const db = getDb();
 
+    if (filter._id && typeof filter._id === 'string') {
+        filter._id = new ObjectID(filter._id);
+    }
     try {
         foundUser = await db.collection(USERS).findOne(filter);
     } catch (e) {
