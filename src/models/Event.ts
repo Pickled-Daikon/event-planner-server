@@ -43,6 +43,10 @@ export async function insertOne(event: IEvent): Promise<IEvent> {
     const db = getDb();
     let queryResult: InsertOneWriteOpResult<IEvent & {_id: string}>;
 
+    if (typeof event.userId === 'string') {
+        event.userId = new ObjectId(event.userId);
+    }
+
     try {
         await findOneUser({_id: event.userId});
     } catch (e) {
@@ -60,7 +64,7 @@ export async function insertOne(event: IEvent): Promise<IEvent> {
     return queryResult.ops[0];
 }
 
-export async function findEvents(queryObject: IEventQueryFilter) {
+export async function findEvents(queryObject: IEventQueryFilter): Promise<IEvent[]> {
     let queryRes: Cursor<IEvent>;
 
     const db = getDb();
@@ -73,7 +77,8 @@ export async function findEvents(queryObject: IEventQueryFilter) {
     }
     try {
         queryRes = await db.collection(EVENTS).find(queryObject);
-        return await queryRes.toArray();
+        const events =  await queryRes.toArray();
+        return events;
     } catch (e) {
         throw new QueryError();
     }
