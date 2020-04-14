@@ -4,25 +4,27 @@ import * as mockDb from '../db/__mocks__/';
 import * as User from './User';
 import * as mockUser from './__mocks__/User';
 
+import { ObjectId } from 'mongodb';
+
 const {getDb} = db as unknown as typeof mockDb;
 const {findOne: findOneUser} = User as unknown as typeof mockUser;
 
-import hasShape from "../tools/hasShape";
 
 jest.mock('../db');
 jest.mock('./User');
 jest.mock('../tools/hasShape');
+jest.mock('mongodb');
 
-import {EVENTS, IEvent, insertOne, isIEvent} from './Event';
+import {EVENTS, IEvent, insertOne, isIEvent, findEvents} from './Event';
 import {UserNotFound} from "./User";
 import {QueryError} from "./errors";
-
 
 
 const dbCollection = getDb().collection();
 
 const dbFindOne = dbCollection.findOne;
 const dbInsertOne = dbCollection.insertOne;
+const dbFine = dbCollection.find;
 
 const fakeEvent: IEvent = {
     userId: '1d',
@@ -115,17 +117,10 @@ test('insertOne returns correct value', async () => {
     expect(returnValue).toEqual(fakeEvent);
 });
 
-test('isIEvent calls hasShape with correct shape', () => {
+// TODO
+test('isIEvent works correctly', () => {
     isIEvent(fakeEvent);
-    expect(hasShape).toBeCalledTimes(1);
-    expect(hasShape).toBeCalledWith(fakeEvent, {
-        _id: {isRequired: false, type: 'string'},
-        userId: {isRequired: true, type: 'string'},
-        description: {isRequired: true, type: 'string'},
-        location: {isRequired: true, type: 'string'},
-        startDateTime: {isRequired: true, type: 'string'},
-        endDateTime: {isRequired: true, type: 'string'}
-    });
+    expect(true).toEqual(false);
 });
 
 test('isIEvent returns false when object has a bad Datetime', () => {
@@ -134,5 +129,45 @@ test('isIEvent returns false when object has a bad Datetime', () => {
 
     expect(isIEvent(badEvent1)).toBe(false);
     expect(isIEvent(badEvent2)).toBe(false);
+});
 
+test('findEvents calls collection.find correctly', async () => {
+    expect.assertions(1);
+    const fakeEventQuery = {
+       _id: 'sfd',
+       userId: 'bla',
+    };
+
+    await findEvents(fakeEventQuery);
+
+    expect(dbCollection.find).toBeCalledWith({
+       _id: new ObjectId(fakeEventQuery._id),
+       userId: new ObjectId(fakeEventQuery.userId),
+    });
+
+});
+
+test('findEvents returns correct value', async () => {
+    expect.assertions(1);
+    const  expectedReturnValue = [{foo: 'bar'}];
+    dbCollection.find.mockImplementationOnce(() => new Promise(resolve => {
+        resolve({
+            toArray: () => expectedReturnValue,
+        })
+    }));
+
+    const returnV = await findEvents({});
+
+    expect(returnV).toEqual(expectedReturnValue);
+});
+
+test('findEvents throw queryError if collection.find throws', async () => {
+    expect.assertions(1);
+    dbCollection.find.mockImplementationOnce(() => {throw new Error()});
+
+    try {
+        await findEvents({});
+    } catch (e) {
+        expect(e).toBeInstanceOf(QueryError);
+    }
 });

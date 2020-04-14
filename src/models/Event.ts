@@ -1,8 +1,7 @@
 import {getDb} from "../db";
-import {findOne as findOneUser, IUser, UserNotFound} from "./User";
-import {InsertOneWriteOpResult} from "mongodb";
+import {findOne as findOneUser, UserNotFound} from "./User";
+import {Cursor, InsertOneWriteOpResult, ObjectId} from "mongodb";
 import {QueryError} from "./errors";
-import hasShape from "../tools/hasShape";
 export { UserNotFound } from './User';
 
 export const EVENTS = 'events';
@@ -20,8 +19,8 @@ const END_DATE_TIME = 'endDateTime';
 const INVALID_DATE = 'Invalid Date';
 
 export interface IEvent {
-    _id?: string,
-    userId: string,
+    _id?: string | ObjectId,
+    userId: string | ObjectId,
     name: string,
     description: string,
     location: string,
@@ -30,9 +29,9 @@ export interface IEvent {
 }
 
 export interface IEventQueryFilter {
-    _id?: string,
+    _id?: string | ObjectId,
     name?: string,
-    userId?: string,
+    userId?: string | ObjectId,
     description?: string,
     location?: string,
     StartDateTime?: string,
@@ -60,6 +59,26 @@ export async function insertOne(event: IEvent): Promise<IEvent> {
 
     return queryResult.ops[0];
 }
+
+export async function findEvents(queryObject: IEventQueryFilter) {
+    let queryRes: Cursor<IEvent>;
+
+    const db = getDb();
+
+    if (typeof queryObject._id === 'string') {
+        queryObject = {...queryObject, _id: new ObjectId(queryObject._id)}
+    }
+    if (typeof queryObject.userId === 'string') {
+        queryObject = {...queryObject, userId: new ObjectId(queryObject.userId)}
+    }
+    try {
+        queryRes = await db.collection(EVENTS).find(queryObject);
+        return await queryRes.toArray();
+    } catch (e) {
+        throw new QueryError();
+    }
+}
+
 
 export function isIEvent(obj: any): obj is IEvent {
     /* has shape not working for this for some reason
@@ -104,3 +123,4 @@ export function isIEvent(obj: any): obj is IEvent {
     }
     return true;
 }
+

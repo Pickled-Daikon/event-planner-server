@@ -8,3 +8,9 @@ export const MongoClient = jest.fn(() => {
    };
 });
 
+export class ObjectId {
+    id: string;
+    constructor(id: string) {
+      this.id = id;
+    }
+}
