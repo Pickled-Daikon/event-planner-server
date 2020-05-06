@@ -1,6 +1,6 @@
 import {getDb} from "../db";
 import {findOne as findOneUser, UserNotFound} from "./User";
-import {Cursor, InsertOneWriteOpResult, ObjectId} from "mongodb";
+import {Cursor, InsertOneWriteOpResult, ObjectId, FilterQuery} from "mongodb";
 import {QueryError} from "./errors";
 export { UserNotFound } from './User';
 
@@ -18,6 +18,13 @@ const END_DATE_TIME = 'endDateTime';
 // string used for dateCheck
 const INVALID_DATE = 'Invalid Date';
 
+export enum Recurrences {
+    DAILY = 'DAILY',
+    WEEKLY = 'WEEKLY',
+    MONTHLY = 'MONTHLY',
+    YEARLY = 'YEARLY',
+}
+
 export interface IEvent {
     _id?: string | ObjectId,
     userId: string | ObjectId,
@@ -26,16 +33,9 @@ export interface IEvent {
     location: string,
     startDateTime: string,
     endDateTime: string,
-}
-
-export interface IEventQueryFilter {
-    _id?: string | ObjectId,
-    name?: string,
-    userId?: string | ObjectId,
-    description?: string,
-    location?: string,
-    StartDateTime?: string,
-    EndDateTime?: string,
+    day: number,
+    month: number,
+    recurrenceType: Recurrences,
 }
 
 export async function insertOne(event: IEvent): Promise<IEvent> {
@@ -64,7 +64,7 @@ export async function insertOne(event: IEvent): Promise<IEvent> {
     return queryResult.ops[0];
 }
 
-export async function findEvents(queryObject: IEventQueryFilter): Promise<IEvent[]> {
+export async function findEvents(queryObject: FilterQuery<IEvent>): Promise<IEvent[]> {
     let queryRes: Cursor<IEvent>;
 
     const db = getDb();
