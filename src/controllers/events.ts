@@ -13,12 +13,8 @@ export const ERROR_MSGS = {
 export async function createEvent(req: Request, res: Response): Promise<Response> {
     const event: IEvent = req.body.event;
 
-    const startDate = new Date(event.startDateTime);
-    const day = startDate.getDay();
-    const month = startDate.getMonth();
-
     try {
-        const newEvent = await Event.insertOne({...event, day, month});
+        const newEvent = await Event.insertOne(event);
         return res.status(200).json({event: newEvent});
     } catch (e) {
         return res.status(400).json({error: ERROR_MSGS.SERVER_ERROR});
@@ -41,24 +37,4 @@ export async function getUserEvents(req: Request, res: Response): Promise<Respon
         return res.status(400).json({error: ERROR_MSGS.SERVER_ERROR});
     }
 }
-export async function getUserEventsByMonth(req: Request, res: Response): Promise<Response> {
-    const userId = req.body.userId;
-    const month = req.body.month;
-    let userEvents;
 
-    if (!userId || typeof userId !== 'string') {
-        return res.status(400).json({error: ERROR_MSGS.BAD_ID_GIVEN});
-    }
-    if (!month || typeof month !== 'number') {
-        return res.status(400).json({error: ERROR_MSGS.BAD_MONTH_GIVEN});
-    }
-
-    try {
-        userEvents = await findEvents({userId, month});
-        return res.status(200).json({
-            events: userEvents,
-        });
-    } catch (e) {
-        return res.status(400).json({error: ERROR_MSGS.SERVER_ERROR});
-    }
-}

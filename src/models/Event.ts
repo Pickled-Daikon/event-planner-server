@@ -32,9 +32,7 @@ export interface IEvent {
     description: string,
     location: string,
     startDateTime: string,
-    endDateTime: string,
-    day: number,
-    month: number,
+    endDateTime: string
     recurrenceType: Recurrences,
 }
 
